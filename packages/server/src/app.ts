@@ -44,7 +44,6 @@ app.get('/api/search', async (req: Request, res: Response) => {
     const guardianResponse = await axios.get(`${process.env.GUARDIAN_API_URL}/search`, {
       params: {
         q: q,
-        'api-key': process.env.GUARDIAN_API_KEY || 'test',
         'page-size': 20
       },
       headers: {
