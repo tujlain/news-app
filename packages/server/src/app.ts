@@ -1,7 +1,17 @@
 import express, { Request, Response } from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import axios from 'axios';
+
+// Load environment variables
+dotenv.config({ path: './.env' });
 
 const app = express();
 const port = 5544;
+
+// Middleware
+app.use(cors()); // Enable CORS for all routes
+app.use(express.json()); // Parse JSON request bodies
 
 interface PingResponse {
   message: string;
@@ -18,7 +28,37 @@ app.get('/', (req: Request, res: Response<PingResponse>) => {
     .send(homeResponse);
 });
 
-// Add other routes as required under api namespace.
+// API Routes
+app.get('/api/search', async (req: Request, res: Response) => {
+  try {
+    const { q } = req.query;
+    
+    // Validate search query
+    if (!q || typeof q !== 'string') {
+      return res.status(400).json({ 
+        error: 'Search query parameter "q" is required' 
+      });
+    }
+
+    // Call Guardian API using axios
+    const guardianResponse = await axios.get(`${process.env.GUARDIAN_API_URL}/search`, {
+      params: {
+        q: q,
+        'api-key': process.env.GUARDIAN_API_KEY || 'test',
+        'page-size': 20
+      },
+      headers: {
+        'api-key': process.env.GUARDIAN_API_KEY || 'test'
+      }
+    });
+
+    // Return the Guardian API response
+    res.json(guardianResponse.data);
+  } catch (error) {
+    console.error('Search error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
