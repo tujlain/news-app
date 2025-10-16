@@ -31,7 +31,7 @@ app.get('/', (req: Request, res: Response<PingResponse>) => {
 // API Routes
 app.get('/api/search', async (req: Request, res: Response) => {
   try {
-    const { q } = req.query;
+    const { q, page } = req.query;
     
     // Validate search query
     if (!q || typeof q !== 'string') {
@@ -44,6 +44,7 @@ app.get('/api/search', async (req: Request, res: Response) => {
     const guardianResponse = await axios.get(`${process.env.GUARDIAN_API_URL}/search`, {
       params: {
         q: q,
+        page: page || 1,  // Default to page 1 if not provided
         'page-size': 20
       },
       headers: {
